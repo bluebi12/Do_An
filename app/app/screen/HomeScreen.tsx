@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Switch, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image } from 'react-native';
 import { getDatabase, ref, onValue, set } from 'firebase/database';
 import { initializeApp } from 'firebase/app';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 
 // Firebase config
@@ -142,22 +142,22 @@ const HomeScreen = () => {
       <Text style={styles.controlTitle}>Điều Khiển Thiết Bị</Text>
       <View style={styles.deviceControlRow}>
         <View style={styles.deviceCard}>
-          <Icon name="tint" size={30} color="#4CAF50" />
+          <MaterialCommunityIcons name="water" size={36} color="#4CAF50" />
           <Text style={styles.deviceLabel}>Bơm Tưới</Text>
           <Switch value={deviceState.pump} onValueChange={value => handleDeviceToggle('bom', value)} />
         </View>
         <View style={styles.deviceCard}>
-          <Icon name="cloud" size={30} color="#2196F3" />
+          <MaterialCommunityIcons name="spray" size={36} color="#2196F3" />
           <Text style={styles.deviceLabel}>Bơm Phun</Text>
           <Switch value={deviceState.spray} onValueChange={value => handleDeviceToggle('phunsuong', value)} />
         </View>
         <View style={styles.deviceCard}>
-          <Icon name="lightbulb-o" size={30} color="#FFEB3B" />
+          <MaterialCommunityIcons name="lightbulb-on-outline" size={36} color="#FFEB3B" />
           <Text style={styles.deviceLabel}>Đèn</Text>
           <Switch value={deviceState.light} onValueChange={value => handleDeviceToggle('den', value)} />
         </View>
         <View style={styles.deviceCard}>
-          <Icon name="refresh" size={30} color="#F44336" />
+          <MaterialCommunityIcons name="fan" size={36} color="#F44336" />
           <Text style={styles.deviceLabel}>Quạt</Text>
           <Switch value={deviceState.fan} onValueChange={value => handleDeviceToggle('quat', value)} />
         </View>
@@ -316,16 +316,20 @@ const styles = StyleSheet.create({
   },
   deviceControlRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     width: '100%',
     marginBottom: 10,
   },
   deviceCard: {
     flex: 1,
+    minWidth: 90,
+    maxWidth: 120,
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 12,
     marginHorizontal: 5,
+    marginVertical: 5,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
