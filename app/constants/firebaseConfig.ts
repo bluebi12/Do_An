@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Cấu hình Firebase (thay thế bằng thông tin từ Firebase Console)
+// Firebase configuration (replace with info from Firebase Console)
 const firebaseConfig = {
   apiKey: "AIzaSyARDVp4S1gCqthn3VYpKTQJv--Sl_xaqD8",
   authDomain: "fir-project-esp32.firebaseapp.com",
@@ -17,9 +17,8 @@ const firebaseConfig = {
 
 // Khởi tạo Firebase
 const app = initializeApp(firebaseConfig);
-
-// Khởi tạo các dịch vụ cần thiết
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 
-export { auth, firestore };
+export { app, auth, firestore };
+

@@ -12,7 +12,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { auth } from './firebaseConfig';
+import { auth } from '@/constants/firebaseConfig';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -20,7 +20,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from './Navigation';
+import type { RootStackParamList } from '@/components/Navigation';
+import { router } from 'expo-router';
 
 const LoginScreen = () => {
   // Sửa lại cách sử dụng useNavigation, sử dụng RootStackParamList đúng cách
@@ -44,13 +45,10 @@ const LoginScreen = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
         Alert.alert('Thành công', 'Đăng nhập thành công!');
-        navigation.replace('Home'); // Chuyển sang màn Home
+        router.replace('/screen/HomeScreen');
       }
-    } catch (error) {
-      const errorMessage = (error as Error).message.includes('email')
-        ? 'Email không hợp lệ hoặc đã tồn tại!'
-        : 'Mật khẩu không đúng!';
-      Alert.alert('Lỗi', errorMessage);
+    } catch (error: any) {
+      Alert.alert('Lỗi', error.message);
     }
   };
 

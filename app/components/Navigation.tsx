@@ -6,8 +6,8 @@ export type RootStackParamList = {
 
 // Các import khác
 import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './LoginScreen';
-import HomeScreen from './HomeScreen';
+import LoginScreen from '../app/screen/LoginScreen';
+import HomeScreen from '@/app/screen/HomeScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
