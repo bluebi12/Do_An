@@ -42,6 +42,13 @@ const HomeScreen = () => {
     lightIntensity: 0,
   });
 
+  const [thresholdInputs, setThresholdInputs] = useState({
+    temperature: '0',
+    humidity: '0',
+    soilMoisture: '0',
+    lightIntensity: '0',
+  });
+
   useEffect(() => {
     const espRef = ref(database, 'esp_guilen');
     const pcRef = ref(database, 'pc_guilen');
@@ -80,6 +87,12 @@ const HomeScreen = () => {
           soilMoisture: data.soilMoisture || 0,
           lightIntensity: data.lightIntensity || 0,
         });
+        setThresholdInputs({
+          temperature: String(data.temperature ?? 0),
+          humidity: String(data.humidity ?? 0),
+          soilMoisture: String(data.soilMoisture ?? 0),
+          lightIntensity: String(data.lightIntensity ?? 0),
+        });
       }
     });
   }, []);
@@ -90,10 +103,12 @@ const HomeScreen = () => {
   };
 
   const handleThresholdChange = (threshold: string, value: string) => {
-    const num = parseFloat(value);
-    if (isNaN(num)) {
-      // Không cập nhật Firebase nếu giá trị không hợp lệ
-      return;
+    let num = parseFloat(value);
+    if (value === '' || isNaN(num)) {
+      num = 0;
+      setThresholdInputs(inputs => ({ ...inputs, [threshold]: '0' }));
+    } else {
+      setThresholdInputs(inputs => ({ ...inputs, [threshold]: value }));
     }
     const thresholdRef = ref(database, `thresholds/${threshold}`);
     set(thresholdRef, num);
@@ -130,38 +145,46 @@ const HomeScreen = () => {
         <View style={styles.cardBlock}>
           <Text style={styles.blockTitle}>Cài Đặt Các Ngưỡng</Text>
           <View style={styles.cardGrid}>
-            <View style={styles.cardInput}><Text style={styles.cardLabel}>🌡️ Ngưỡng Nhiệt độ</Text><TextInput style={styles.input} value={String(thresholds.temperature)} keyboardType="numeric" onChangeText={text => handleThresholdChange('temperature', text)} placeholder="Nhập nhiệt độ" /></View>
-            <View style={styles.cardInput}><Text style={styles.cardLabel}>💧 Ngưỡng Độ ẩm</Text><TextInput style={styles.input} value={String(thresholds.humidity)} keyboardType="numeric" onChangeText={text => handleThresholdChange('humidity', text)} placeholder="Nhập độ ẩm" /></View>
-            <View style={styles.cardInput}><Text style={styles.cardLabel}>🌱 Ngưỡng Độ ẩm đất</Text><TextInput style={styles.input} value={String(thresholds.soilMoisture)} keyboardType="numeric" onChangeText={text => handleThresholdChange('soilMoisture', text)} placeholder="Nhập độ ẩm đất" /></View>
-            <View style={styles.cardInput}><Text style={styles.cardLabel}>☀️ Ngưỡng Cường độ ánh sáng</Text><TextInput style={styles.input} value={String(thresholds.lightIntensity)} keyboardType="numeric" onChangeText={text => handleThresholdChange('lightIntensity', text)} placeholder="Nhập cường độ" /></View>
+            <View style={styles.cardInput}><Text style={styles.cardLabel}>🌡️ Ngưỡng Nhiệt độ</Text><TextInput style={styles.input} value={thresholdInputs.temperature} keyboardType="numeric" onChangeText={text => handleThresholdChange('temperature', text)} placeholder="Nhập nhiệt độ" /></View>
+            <View style={styles.cardInput}><Text style={styles.cardLabel}>💧 Ngưỡng Độ ẩm</Text><TextInput
+              style={styles.input}
+              value={thresholdInputs.humidity}
+              keyboardType="numeric"
+              onChangeText={text => handleThresholdChange('humidity', text)}
+              placeholder="Nhập độ ẩm"
+            /></View>
+            <View style={styles.cardInput}><Text style={styles.cardLabel}>🌱 Ngưỡng Độ ẩm đất</Text><TextInput style={styles.input} value={thresholdInputs.soilMoisture} keyboardType="numeric" onChangeText={text => handleThresholdChange('soilMoisture', text)} placeholder="Nhập độ ẩm đất" /></View>
+            <View style={styles.cardInput}><Text style={styles.cardLabel}>☀️ Ngưỡng Cường độ ánh sáng</Text><TextInput style={styles.input} value={thresholdInputs.lightIntensity} keyboardType="numeric" onChangeText={text => handleThresholdChange('lightIntensity', text)} placeholder="Nhập cường độ" /></View>
           </View>
         </View>
       </View>
 
       {/* Điều khiển thiết bị */}
       <Text style={styles.controlTitle}>Điều Khiển Thiết Bị</Text>
-      <View style={styles.deviceControlRow}>
-        <View style={styles.deviceCard}>
-          <MaterialCommunityIcons name="water" size={36} color="#4CAF50" />
-          <Text style={styles.deviceLabel}>Bơm Tưới</Text>
-          <Switch value={deviceState.pump} onValueChange={value => handleDeviceToggle('bom', value)} />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
+        <View style={styles.deviceControlRow}>
+          <View style={styles.deviceCard}>
+            <MaterialCommunityIcons name="water" size={36} color="#4CAF50" />
+            <Text style={styles.deviceLabel}>Bơm Tưới</Text>
+            <Switch value={deviceState.pump} onValueChange={value => handleDeviceToggle('bom', value)} />
+          </View>
+          <View style={styles.deviceCard}>
+            <MaterialCommunityIcons name="water-pump" size={36} color="#2196F3" />
+            <Text style={styles.deviceLabel}>Bơm Phun</Text>
+            <Switch value={deviceState.spray} onValueChange={value => handleDeviceToggle('phunsuong', value)} />
+          </View>
+          <View style={styles.deviceCard}>
+            <MaterialCommunityIcons name="lightbulb-on-outline" size={36} color="#FFEB3B" />
+            <Text style={styles.deviceLabel}>Đèn</Text>
+            <Switch value={deviceState.light} onValueChange={value => handleDeviceToggle('den', value)} />
+          </View>
+          <View style={styles.deviceCard}>
+            <MaterialCommunityIcons name="fan" size={36} color="#F44336" />
+            <Text style={styles.deviceLabel}>Quạt</Text>
+            <Switch value={deviceState.fan} onValueChange={value => handleDeviceToggle('quat', value)} />
+          </View>
         </View>
-        <View style={styles.deviceCard}>
-          <MaterialCommunityIcons name="spray" size={36} color="#2196F3" />
-          <Text style={styles.deviceLabel}>Bơm Phun</Text>
-          <Switch value={deviceState.spray} onValueChange={value => handleDeviceToggle('phunsuong', value)} />
-        </View>
-        <View style={styles.deviceCard}>
-          <MaterialCommunityIcons name="lightbulb-on-outline" size={36} color="#FFEB3B" />
-          <Text style={styles.deviceLabel}>Đèn</Text>
-          <Switch value={deviceState.light} onValueChange={value => handleDeviceToggle('den', value)} />
-        </View>
-        <View style={styles.deviceCard}>
-          <MaterialCommunityIcons name="fan" size={36} color="#F44336" />
-          <Text style={styles.deviceLabel}>Quạt</Text>
-          <Switch value={deviceState.fan} onValueChange={value => handleDeviceToggle('quat', value)} />
-        </View>
-      </View>
+      </ScrollView>
 
       {/* Logout button */}
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
@@ -316,8 +339,8 @@ const styles = StyleSheet.create({
   },
   deviceControlRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    alignItems: 'stretch',
     width: '100%',
     marginBottom: 10,
   },
@@ -329,8 +352,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     marginHorizontal: 5,
-    marginVertical: 5,
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
