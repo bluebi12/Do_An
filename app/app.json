@@ -19,6 +19,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.thanhdat.iot",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -34,7 +35,7 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "newArchEnabled": true
+      "newArchEnabled": false
     }
   }
 }

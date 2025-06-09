@@ -5,7 +5,7 @@ import { initializeApp } from 'firebase/app';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 
-// Firebase config
+// Cấu hình Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyARDVp4S1gCqthn3VYpKTQJv--Sl_xaqD8",
   authDomain: "fir-project-esp32.firebaseapp.com",
@@ -16,56 +16,57 @@ const firebaseConfig = {
   appId: "1:656047656204:web:0bde420be3a1f5d8dfcd29",
   measurementId: "G-RZR300WEJ2"
 };
-
+// Khởi tạo Firebase 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 const HomeScreen = () => {
+  // Trạng thái dữ liệu cảm biến từ ESP32
   const [sensorData, setSensorData] = useState({
     temperature: 0,
     humidity: 0,
     soilMoisture: 0,
     lightIntensity: 0,
   });
-  
+  // Trạng thái thiết bị (bơm, đèn, phun sương, quạt)
   const [deviceState, setDeviceState] = useState({
     pump: false,
     light: false,
     spray: false,
     fan: false,
   });
-
+  // Ngưỡng điều kiện thiết bị sẽ kích hoạt ở chế độ tự động
   const [thresholds, setThresholds] = useState({
     temperature: 0,
     humidity: 0,
     soilMoisture: 0,
     lightIntensity: 0,
   });
-
+  // Dữ liệu nhập từ người dùng cho các ngưỡng
   const [thresholdInputs, setThresholdInputs] = useState({
     temperature: '0',
     humidity: '0',
     soilMoisture: '0',
     lightIntensity: '0',
   });
-
+  const [mode, setMode] = useState(0); // 0: Auto, 1: Manual
   useEffect(() => {
+    // Lấy dữ liệu cảm biến từ esp_guilen
     const espRef = ref(database, 'esp_guilen');
-    const pcRef = ref(database, 'pc_guilen');
-    const thresholdsRef = ref(database, 'thresholds');
-
     onValue(espRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         setSensorData({
-          temperature: data.nhietdo,
-          humidity: data.doam,
-          soilMoisture: data.doamdat,
-          lightIntensity: data.anhsang,
+          temperature: data.nhietdo ?? 0,
+          humidity: data.doam ?? 0,
+          soilMoisture: data.doamdat ?? 0,
+          lightIntensity: data.anhsang ?? 0,
         });
       }
     });
 
+     // Cập nhật trạng thái thiết bị theo thời gian thực từ pc_guilen
+    const pcRef = ref(database, 'pc_guilen');
     onValue(pcRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -78,14 +79,16 @@ const HomeScreen = () => {
       }
     });
 
+    // Đồng bộ ngưỡng điều kiện từ Firebase
+    const thresholdsRef = ref(database, 'thresholds');
     onValue(thresholdsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         setThresholds({
-          temperature: data.temperature || 0,
-          humidity: data.humidity || 0,
-          soilMoisture: data.soilMoisture || 0,
-          lightIntensity: data.lightIntensity || 0,
+          temperature: data.temperature ?? 0,
+          humidity: data.humidity ?? 0,
+          soilMoisture: data.soilMoisture ?? 0,
+          lightIntensity: data.lightIntensity ?? 0,
         });
         setThresholdInputs({
           temperature: String(data.temperature ?? 0),
@@ -95,13 +98,25 @@ const HomeScreen = () => {
         });
       }
     });
+
+    // Theo dõi chế độ hoạt động từ esp_guilen/mode
+    const modeRef = ref(database, 'esp_guilen/mode');
+    onValue(modeRef, (snapshot) => {
+      const value = snapshot.val();
+      if (value !== null) setMode(value);
+    });
   }, []);
 
+  // Điều khiển thiết bị (chỉ khi mode = 1)
   const handleDeviceToggle = (device: string, value: boolean) => {
-    const deviceRef = ref(database, `pc_guilen/${device}`);
-    set(deviceRef, value ? 1 : 0);
+    if (mode === 1) {
+      const deviceRef = ref(database, `pc_guilen/${device}`);
+      set(deviceRef, value ? 1 : 0)
+        .catch(err => console.error("Set device error:", err));
+    }
   };
 
+  // Cập nhật giá trị threshold lên Firebase
   const handleThresholdChange = (threshold: string, value: string) => {
     let num = parseFloat(value);
     if (value === '' || isNaN(num)) {
@@ -111,7 +126,18 @@ const HomeScreen = () => {
       setThresholdInputs(inputs => ({ ...inputs, [threshold]: value }));
     }
     const thresholdRef = ref(database, `thresholds/${threshold}`);
-    set(thresholdRef, num);
+    set(thresholdRef, num)
+      .catch(err => console.error("Set threshold error:", err));
+  };
+
+  // Chuyển đổi chế độ tự động/manual và cập nhật Firebase
+  const toggleMode = (value: boolean) => {
+    const newMode = value ? 1 : 0;
+    const modeRef = ref(database, 'esp_guilen/mode');
+    setMode(newMode);
+    set(modeRef, newMode)
+      .then(() => console.log("Mode updated successfully"))
+      .catch(error => console.error("Error updating mode:", error));
   };
 
   const handleLogout = () => {
@@ -120,68 +146,172 @@ const HomeScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header + Logo + Title */}
+      {/* Hiển thị thông tin */}
       <View style={styles.headerContainer}>
         <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
         <Text style={styles.schoolName}>TRƯỜNG ĐẠI HỌC SƯ PHẠM KỸ THUẬT THÀNH PHỐ HỒ CHÍ MINH</Text>
         <Text style={styles.projectTitle}>ĐỒ ÁN TỐT NGHIỆP</Text>
-        <Text style={styles.projectDesc}>SỬ DỤNG NĂNG LƯỢNG MẶT TRỜI KẾT HỢP IOT ĐỂ TƯỚI CÂY</Text>
-
+        <Text style={styles.projectDesc}>MÔ HÌNH HỆ THỐNG TƯỚI TIÊU THÔNG MINH SỬ DỤNG NĂNG LƯỢNG MẶT TRỜI</Text>
       </View>
 
-      {/* 2 khối: Hiển thị giá trị & Cài đặt ngưỡng */}
+      {/* Cảm biến và Giá trị cài đặt */}
       <View style={styles.cardRow}>
-        {/* Hiển thị giá trị */}
         <View style={styles.cardBlock}>
-          <Text style={styles.blockTitle}>Hiển Thị Các Giá Trị</Text>
+          <Text style={styles.blockTitle}>Display sensor values</Text>
           <View style={styles.cardGrid}>
-            <View style={styles.card}><Text style={styles.cardLabel}>🌡️ Nhiệt độ</Text><Text style={styles.cardValue}>{sensorData.temperature} °C</Text></View>
-            <View style={styles.card}><Text style={styles.cardLabel}>💧 Độ ẩm không khí</Text><Text style={styles.cardValue}>{sensorData.humidity} %</Text></View>
-            <View style={styles.card}><Text style={styles.cardLabel}>🌱 Độ ẩm đất</Text><Text style={styles.cardValue}>{sensorData.soilMoisture} %</Text></View>
-            <View style={styles.card}><Text style={styles.cardLabel}>☀️ Cường độ ánh sáng</Text><Text style={styles.cardValue}>{sensorData.lightIntensity} lux</Text></View>
+            <View style={styles.card}>
+              <Text style={styles.cardLabel}>🌡️ Temperature</Text>
+              <Text style={styles.cardValue}>{sensorData.temperature} °C</Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardLabel}>💧 Air Humidity</Text>
+              <Text style={styles.cardValue}>{sensorData.humidity} %</Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardLabel}>🌱 Soil Moisture</Text>
+              <Text style={styles.cardValue}>{sensorData.soilMoisture} %</Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardLabel}>☀️ Light Intensity</Text>
+              <Text style={styles.cardValue}>{sensorData.lightIntensity} lux</Text>
+            </View>
           </View>
         </View>
-        {/* Cài đặt ngưỡng */}
+        { /* Cài đặt giá trị */}
         <View style={styles.cardBlock}>
-          <Text style={styles.blockTitle}>Cài Đặt Các Ngưỡng</Text>
+          <Text style={styles.blockTitle}>Setting Values</Text>
           <View style={styles.cardGrid}>
-            <View style={styles.cardInput}><Text style={styles.cardLabel}>🌡️ Ngưỡng Nhiệt độ</Text><TextInput style={styles.input} value={thresholdInputs.temperature} keyboardType="numeric" onChangeText={text => handleThresholdChange('temperature', text)} placeholder="Nhập nhiệt độ" /></View>
-            <View style={styles.cardInput}><Text style={styles.cardLabel}>💧 Ngưỡng Độ ẩm</Text><TextInput
-              style={styles.input}
-              value={thresholdInputs.humidity}
-              keyboardType="numeric"
-              onChangeText={text => handleThresholdChange('humidity', text)}
-              placeholder="Nhập độ ẩm"
-            /></View>
-            <View style={styles.cardInput}><Text style={styles.cardLabel}>🌱 Ngưỡng Độ ẩm đất</Text><TextInput style={styles.input} value={thresholdInputs.soilMoisture} keyboardType="numeric" onChangeText={text => handleThresholdChange('soilMoisture', text)} placeholder="Nhập độ ẩm đất" /></View>
-            <View style={styles.cardInput}><Text style={styles.cardLabel}>☀️ Ngưỡng Cường độ ánh sáng</Text><TextInput style={styles.input} value={thresholdInputs.lightIntensity} keyboardType="numeric" onChangeText={text => handleThresholdChange('lightIntensity', text)} placeholder="Nhập cường độ" /></View>
+            <View style={styles.cardInput}>
+              <Text style={styles.cardLabel}>🌡️ Temperature</Text>  { /* Nhiệt độ */}
+              <TextInput
+                style={styles.input}
+                value={thresholdInputs.temperature}
+                keyboardType="numeric"
+                onChangeText={text => handleThresholdChange('temperature', text)}
+                placeholder="Enter temperature"
+              />
+            </View>
+            <View style={styles.cardInput}>
+              <Text style={styles.cardLabel}>💧 Air Humidity</Text>  {/* Độ ẩm không khí */}
+              <TextInput
+                style={styles.input}
+                value={thresholdInputs.humidity}
+                keyboardType="numeric"
+                onChangeText={text => handleThresholdChange('humidity', text)}
+                placeholder="Enter humidity"
+              />
+            </View>
+            <View style={styles.cardInput}>
+              <Text style={styles.cardLabel}>🌱 Soil Moisture</Text> {     /* Độ ẩm đất */}
+              <TextInput
+                style={styles.input}
+                value={thresholdInputs.soilMoisture}
+                keyboardType="numeric"
+                onChangeText={text => handleThresholdChange('soilMoisture', text)}
+                placeholder="Enter soil moisture"
+              />
+            </View>
+            <View style={styles.cardInput}>
+              <Text style={styles.cardLabel}>☀️ Light Intensity</Text> {/* Cường độ ánh sáng */}
+              <TextInput
+                style={styles.input}
+                value={thresholdInputs.lightIntensity}
+                keyboardType="numeric"
+                onChangeText={text => handleThresholdChange('lightIntensity', text)}
+                placeholder="Enter light intensity"
+              />
+            </View>
           </View>
         </View>
       </View>
 
       {/* Điều khiển thiết bị */}
-      <Text style={styles.controlTitle}>Điều Khiển Thiết Bị</Text>
+      <Text style={styles.controlTitle}>DEVICE CONTROL</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
         <View style={styles.deviceControlRow}>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="water" size={36} color="#4CAF50" />
-            <Text style={styles.deviceLabel}>Bơm Tưới</Text>
-            <Switch value={deviceState.pump} onValueChange={value => handleDeviceToggle('bom', value)} />
+            <MaterialCommunityIcons name="water" size={36} color="#2196F3" /> {/* Bơm tưới*/}
+            <Text style={styles.deviceLabel}>Irrigation Pump</Text>
+            <Switch
+              value={
+                mode === 0
+                  ? sensorData.soilMoisture < thresholds.soilMoisture  
+                  : deviceState.pump
+              }
+              onValueChange={value => handleDeviceToggle('bom', value)}
+              disabled={mode === 0}
+              trackColor={{ false: "#ccc", true: "#81d4fa" }}
+              thumbColor={
+                (mode === 0
+                  ? sensorData.soilMoisture < thresholds.soilMoisture
+                  : deviceState.pump) ? "#2196F3" : "#f4f3f4"
+              }
+            />
           </View>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="water-pump" size={36} color="#2196F3" />
-            <Text style={styles.deviceLabel}>Bơm Phun</Text>
-            <Switch value={deviceState.spray} onValueChange={value => handleDeviceToggle('phunsuong', value)} />
+            <MaterialCommunityIcons name="water" size={36} color="#2196F3" /> {/* Bơm phun sương */}
+            <Text style={styles.deviceLabel}>Misting Pump</Text>
+            <Switch
+              value={
+                mode === 0
+                  ? sensorData.humidity < thresholds.humidity 
+                  : deviceState.spray
+              }
+              onValueChange={value => handleDeviceToggle('phunsuong', value)}
+              disabled={mode === 0}
+              trackColor={{ false: "#ccc", true: "#2196F3" }}  
+              thumbColor={
+                (mode === 0
+                  ? sensorData.humidity < thresholds.humidity
+                  : deviceState.spray)? "#2196F3" : "#f4f3f4"
+              }
+            />
           </View>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="lightbulb-on-outline" size={36} color="#FFEB3B" />
-            <Text style={styles.deviceLabel}>Đèn</Text>
-            <Switch value={deviceState.light} onValueChange={value => handleDeviceToggle('den', value)} />
+            <MaterialCommunityIcons name="lightbulb-on-outline" size={36} color="#FFEB3B" /> {/* Đèn chiếu sáng */}
+            <Text style={styles.deviceLabel}>Light</Text>
+            <Switch
+              value={
+                mode === 0
+                  ? sensorData.lightIntensity < thresholds.lightIntensity
+                  : deviceState.light
+              }
+              onValueChange={value => handleDeviceToggle('den', value)}
+              disabled={mode === 0}
+              trackColor={{ false: "#ccc", true: "#81d4fa" }}  
+              thumbColor={
+                (mode === 0
+                  ? sensorData.lightIntensity < thresholds.lightIntensity
+                  : deviceState.light)? "#2196F3"   : "#f4f3f4"   
+              }
+            />
           </View>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="fan" size={36} color="#F44336" />
-            <Text style={styles.deviceLabel}>Quạt</Text>
-            <Switch value={deviceState.fan} onValueChange={value => handleDeviceToggle('quat', value)} />
+            <MaterialCommunityIcons name="fan" size={36} color="#F44336" /> {/* Quạt */}
+            <Text style={styles.deviceLabel}>Fan</Text>
+            <Switch
+              value={
+                mode === 0
+                  ? sensorData.temperature > thresholds.temperature 
+                  : deviceState.fan
+              }
+              onValueChange={value => handleDeviceToggle('quat', value)}
+              disabled={mode === 0}
+              trackColor={{ false: "#ccc", true: "#81d4fa" }} 
+              thumbColor={
+                (mode === 0
+                  ? sensorData.temperature > thresholds.temperature
+                  : deviceState.fan) ? "#2196F3" : "#f4f3f4"
+              }
+            />
+          </View>
+          <View style={styles.deviceCard}>
+            <MaterialCommunityIcons name="refresh" size={36} color="#2196F3" /> {/* Chế độ tự động/manual */}
+            <Text style={styles.deviceLabel}>{mode === 0 ? 'Auto' : 'Manual'}</Text>
+            <Switch
+              value={mode === 1}
+              onValueChange={toggleMode}
+            />
           </View>
         </View>
       </ScrollView>

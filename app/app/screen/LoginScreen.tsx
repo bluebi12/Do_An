@@ -1,17 +1,6 @@
-// LoginScreen.tsx
+// Import các thư viện cần thiết
 import React, { useState } from 'react';
-import {
-  Text,
-  TextInput,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import {Text,TextInput,View,StyleSheet,TouchableOpacity,Alert,ImageBackground,KeyboardAvoidingView,Platform,ScrollView,} from 'react-native';
 import { auth } from '@/constants/firebaseConfig';
 import {
   createUserWithEmailAndPassword,
@@ -24,9 +13,8 @@ import type { RootStackParamList } from '@/components/Navigation';
 import { router } from 'expo-router';
 
 const LoginScreen = () => {
-  // Sửa lại cách sử dụng useNavigation, sử dụng RootStackParamList đúng cách
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
+// State quản lý email, password, chế độ đăng ký, và hiển thị mật khẩu
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
@@ -34,29 +22,33 @@ const LoginScreen = () => {
 
   const handleAuth = async () => {
     if (!email || !password) {
-      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin!');
+      Alert.alert('Error', 'Please fill in all the information!');
       return;
     }
 
     try {
       if (isRegistering) {
+         // Đăng ký tài khoản
         await createUserWithEmailAndPassword(auth, email, password);
-        Alert.alert('Thành công', 'Đăng ký thành công!');
+        Alert.alert('Success', 'Sign up successful!');
       } else {
+        // Đăng nhập tài khoản
         await signInWithEmailAndPassword(auth, email, password);
-        Alert.alert('Thành công', 'Đăng nhập thành công!');
+        Alert.alert('Success', 'Sign in successful!');
+        setTimeout(() => {
+        // Chuyển sang HomeScreen sau khi đăng nhập thành công
         router.replace('/screen/HomeScreen');
+        }, 2000);
       }
     } catch (error: any) {
       Alert.alert('Lỗi', error.message);
     }
   };
-
   const handleGoogleLogin = () => {
     Alert.alert('Đăng nhập', 'Đăng nhập bằng Google');
   };
 
-  return (
+  return ( // Giao diện đăng nhập và đăng ký
     <ImageBackground
       source={require('../../assets/images/background.jpg')}
       resizeMode="cover"
@@ -69,7 +61,7 @@ const LoginScreen = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.container}>
-            <Text style={styles.header}>{isRegistering ? 'Đăng Ký' : 'Đăng Nhập'}</Text>
+            <Text style={styles.header}>{isRegistering ? 'Sign Up' : 'Sign in'}</Text>
             <View style={styles.inputContainer}>
               <Ionicons name="mail" size={24} color="#007aff" style={styles.inputIcon} />
               <TextInput
@@ -85,7 +77,7 @@ const LoginScreen = () => {
               <Ionicons name="lock-closed" size={24} color="#007aff" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Mật khẩu"
+                placeholder="Password"
                 placeholderTextColor="#888"
                 value={password}
                 secureTextEntry={!showPassword}
@@ -96,19 +88,19 @@ const LoginScreen = () => {
               </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.button} onPress={handleAuth}>
-              <Text style={styles.buttonText}>{isRegistering ? 'Đăng Ký' : 'Đăng Nhập'}</Text>
+              <Text style={styles.buttonText}>{isRegistering ? 'Sign up' : 'Sign in'}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsRegistering(!isRegistering)}>
               <Text style={styles.switchText}>
-                {isRegistering ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký'}
+                {isRegistering ? 'Already have an account? Log in' : "Don't have an account? Sign up"}
               </Text>
             </TouchableOpacity>
             <View style={styles.orContainer}>
-              <Text style={styles.orText}>Hoặc</Text>
+              <Text style={styles.orText}>Or</Text>
             </View>
             <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
               <Ionicons name="logo-google" size={24} color="#fff" />
-              <Text style={styles.socialText}>Đăng nhập bằng Google</Text>
+              <Text style={styles.socialText}>Sign in with Google</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
