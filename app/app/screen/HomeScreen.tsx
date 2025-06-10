@@ -182,7 +182,8 @@ const HomeScreen = () => {
           <Text style={styles.blockTitle}>Setting Values</Text>
           <View style={styles.cardGrid}>
             <View style={styles.cardInput}>
-              <Text style={styles.cardLabel}>🌡️ Temperature</Text>  { /* Nhiệt độ */}
+              { /* Nhiệt độ */}
+              <Text style={styles.cardLabel}>🌡️ Temperature</Text>  
               <TextInput
                 style={styles.input}
                 value={thresholdInputs.temperature}
@@ -192,7 +193,8 @@ const HomeScreen = () => {
               />
             </View>
             <View style={styles.cardInput}>
-              <Text style={styles.cardLabel}>💧 Air Humidity</Text>  {/* Độ ẩm không khí */}
+              {/* Độ ẩm không khí */}
+              <Text style={styles.cardLabel}>💧 Air Humidity</Text>  
               <TextInput
                 style={styles.input}
                 value={thresholdInputs.humidity}
@@ -202,7 +204,8 @@ const HomeScreen = () => {
               />
             </View>
             <View style={styles.cardInput}>
-              <Text style={styles.cardLabel}>🌱 Soil Moisture</Text> {     /* Độ ẩm đất */}
+              {/* Độ ẩm đất */}
+              <Text style={styles.cardLabel}>🌱 Soil Moisture</Text> 
               <TextInput
                 style={styles.input}
                 value={thresholdInputs.soilMoisture}
@@ -212,7 +215,8 @@ const HomeScreen = () => {
               />
             </View>
             <View style={styles.cardInput}>
-              <Text style={styles.cardLabel}>☀️ Light Intensity</Text> {/* Cường độ ánh sáng */}
+              {/* Cường độ ánh sáng */}
+              <Text style={styles.cardLabel}>☀️ Light Intensity</Text> 
               <TextInput
                 style={styles.input}
                 value={thresholdInputs.lightIntensity}
@@ -230,7 +234,8 @@ const HomeScreen = () => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
         <View style={styles.deviceControlRow}>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="water" size={36} color="#2196F3" /> {/* Bơm tưới*/}
+            {/* Bơm tưới*/}
+            <MaterialCommunityIcons name="water" size={36} color="#2196F3" /> 
             <Text style={styles.deviceLabel}>Irrigation Pump</Text>
             <Switch
               value={
@@ -249,7 +254,8 @@ const HomeScreen = () => {
             />
           </View>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="water" size={36} color="#2196F3" /> {/* Bơm phun sương */}
+            {/* Bơm phun sương */}
+            <MaterialCommunityIcons name="water" size={36} color="#2196F3" /> 
             <Text style={styles.deviceLabel}>Misting Pump</Text>
             <Switch
               value={
@@ -268,7 +274,8 @@ const HomeScreen = () => {
             />
           </View>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="lightbulb-on-outline" size={36} color="#FFEB3B" /> {/* Đèn chiếu sáng */}
+            {/* Đèn chiếu sáng */}
+            <MaterialCommunityIcons name="lightbulb-on-outline" size={36} color="#FFEB3B" /> 
             <Text style={styles.deviceLabel}>Light</Text>
             <Switch
               value={
@@ -287,7 +294,8 @@ const HomeScreen = () => {
             />
           </View>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="fan" size={36} color="#F44336" /> {/* Quạt */}
+            {/* Quạt */}
+            <MaterialCommunityIcons name="fan" size={36} color="#F44336" /> 
             <Text style={styles.deviceLabel}>Fan</Text>
             <Switch
               value={
@@ -306,7 +314,8 @@ const HomeScreen = () => {
             />
           </View>
           <View style={styles.deviceCard}>
-            <MaterialCommunityIcons name="refresh" size={36} color="#2196F3" /> {/* Chế độ tự động/manual */}
+            {/* Chế độ tự động/manual */}
+            <MaterialCommunityIcons name="refresh" size={36} color="#2196F3" />
             <Text style={styles.deviceLabel}>{mode === 0 ? 'Auto' : 'Manual'}</Text>
             <Switch
               value={mode === 1}
