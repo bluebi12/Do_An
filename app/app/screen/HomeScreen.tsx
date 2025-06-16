@@ -230,7 +230,7 @@ const HomeScreen = () => {
       </View>
 
       {/* Điều khiển thiết bị */}
-      <Text style={styles.controlTitle}>DEVICE CONTROL</Text>
+      <Text style={styles.controlTitle}>Device Controls</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
         <View style={styles.deviceControlRow}>
           <View style={styles.deviceCard}>

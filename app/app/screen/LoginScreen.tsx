@@ -48,7 +48,8 @@ const LoginScreen = () => {
     Alert.alert('Đăng nhập', 'Đăng nhập bằng Google');
   };
 
-  return ( // Giao diện đăng nhập và đăng ký
+  return ( 
+    // Giao diện đăng nhập và đăng ký
     <ImageBackground
       source={require('../../assets/images/background.jpg')}
       resizeMode="cover"
